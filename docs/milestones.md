@@ -47,6 +47,13 @@ Do not generalize: no speculative systems.
 ---
 
 ## M1 — Movement, interaction, and first-room atmosphere
+**Status: complete.** First-person `PlayerController` (UniversalCamera +
+pointer lock + `_collideWithWorld`), action-mapped `InputState`, reusable
+`InteractionSystem` covering inspect/toggle/pickup with single-target
+prompt UI, DOM pause menu. One deliberate atmospheric room with warm desk
+spot + cold accent + fog; terminal, wall switch (toggles ceiling lamp), and
+pickup wired as the three interactables. No M2+ systems added.
+
 ### Goal
 Create a playable first room with premium tone, reliable first-person controls, and a unified interaction base.
 

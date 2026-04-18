@@ -61,9 +61,17 @@ npm install
 npm run dev
 ```
 
-Vite prints a local URL (default `http://localhost:5173`). Open it in a browser;
-you should see a minimal M0 placeholder scene rendered by Babylon.js and a
-`BLACK GLASS — M0 running (WebGL2)` status label in the bottom-left corner.
+Vite prints a local URL (default `http://localhost:5173`). Open it in a browser
+and **click the canvas** to enter pointer lock. Controls:
+
+- Move: **WASD** (or arrows)
+- Sprint: **Shift**
+- Look: **mouse** (while pointer-locked)
+- Interact: **E**
+- Pause / release pointer: **Esc**
+
+The M1 room contains three interactables: a shift-log terminal (read), a
+wall switch (toggle the ceiling lamp), and a data shard on the desk (pickup).
 
 Type check + production build:
 
@@ -87,10 +95,17 @@ src/
     bootstrap.ts    # engine, render loop, resize handling
     config.ts       # app-level constants
   scenes/
-    RootScene.ts    # M0 placeholder scene
+    RootScene.ts    # M1 first room + interactables
   styles.css
+  gameplay/
+    player/         # M1: PlayerController, input
+    interaction/    # M1: Interactable, InteractionSystem, types
+    ui/             # M1: InteractionPrompt, PauseMenu
+    inventory/      # reserved — M2
+    evidence/       # reserved — M2
+    worldState/     # reserved — M3
+    ai/             # reserved — M4
   systems/          # reserved — input/audio/assets (M1+)
-  gameplay/         # reserved — player/interaction/evidence/ai/ui
   render/           # reserved — pipeline/post (M1+)
   data/             # reserved — evidence/items/world/endings
   debug/            # reserved — debug overlays
@@ -111,10 +126,11 @@ Milestone-gated folders are intentionally empty for now — see
 - Pause: Esc
 
 ## Current status
-**Milestone 0 — complete.** Project foundation: Vite + TypeScript + Babylon.js
-browser app with bootstrap shell, resize handling, and a minimal placeholder
-scene. No gameplay systems implemented yet.
+**Milestone 1 — complete.** Playable first room with first-person movement,
+pointer-lock mouse look, collision, a reusable interaction shell covering
+`inspect` / `toggle` / `pickup`, a minimal prompt UI, and a pause menu.
+No inventory, evidence board, AI, or world-state systems yet.
 
 ## Next step
-Begin Milestone 1 (movement, interaction, first-room atmosphere) against the
-existing bootstrap shell — see `docs/milestones.md`.
+Begin Milestone 2 (evidence loop and inventory/evidence board) on top of the
+existing interaction shell — see `docs/milestones.md`.
