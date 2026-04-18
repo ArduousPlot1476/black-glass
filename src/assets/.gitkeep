@@ -1,0 +1,3 @@
+# Source-tracked assets. Folder conventions live in docs/assets.md.
+# Runtime-loaded binaries should generally live in /public — this tree is for
+# imported modules and small authored helpers.
