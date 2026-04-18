@@ -29,7 +29,7 @@ export class PauseMenu {
     const title = document.createElement("h2");
     title.textContent = "PAUSED";
     const hint = document.createElement("p");
-    hint.textContent = "BLACK GLASS — Milestone 1";
+    hint.textContent = "BLACK GLASS — Milestone 2";
     this.resumeBtn = document.createElement("button");
     this.resumeBtn.type = "button";
     this.resumeBtn.textContent = "Resume";

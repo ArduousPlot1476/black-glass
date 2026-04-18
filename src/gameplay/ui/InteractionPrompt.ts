@@ -1,7 +1,7 @@
 import type { Scene } from "@babylonjs/core/scene";
 
 import type { InteractionSystem } from "../interaction/InteractionSystem";
-import type { Interactable, InteractionContext } from "../interaction/interactionTypes";
+import type { Interactable, PromptUIContext } from "../interaction/interactionTypes";
 import { verbForKind } from "../interaction/interactionTypes";
 import type { InputState } from "../player/input";
 import type { PlayerController } from "../player/PlayerController";
@@ -27,6 +27,10 @@ export class InteractionPrompt {
   private readonly scene: Scene;
   private readonly input: InputState;
   private readonly player: PlayerController;
+
+  private system: InteractionSystem | null = null;
+  private currentTarget: Interactable | null = null;
+  private lastPromptText = "";
 
   private inspectOpen = false;
   private inspectCooldown = 0;
@@ -81,7 +85,15 @@ export class InteractionPrompt {
         } else if (this.input.consumeJustPressed("interact")) {
           this.closeInspect({ unpause: true });
         }
+        return;
       }
+      // Poll the live target each frame so mutated prompt text (e.g. a gate
+      // flipping from "sealed" to "open") re-renders without new plumbing.
+      const live = this.system?.getCurrent() ?? null;
+      if (live !== this.currentTarget) {
+        this.currentTarget = live;
+      }
+      this.renderPrompt(this.currentTarget);
     };
     scene.onBeforeRenderObservable.add(this.onBeforeRender);
   }
@@ -93,10 +105,14 @@ export class InteractionPrompt {
 
   bindSystem(system: InteractionSystem): void {
     this.unsubscribe?.();
-    this.unsubscribe = system.onTargetChanged((t) => this.updatePrompt(t));
+    this.system = system;
+    this.unsubscribe = system.onTargetChanged((t) => {
+      this.currentTarget = t;
+      this.renderPrompt(t);
+    });
   }
 
-  context(): InteractionContext {
+  uiContext(): PromptUIContext {
     return {
       showInspectPanel: (title, body) => this.showInspectPanel(title, body),
       hideInspectPanel: () => this.closeInspect({ unpause: true }),
@@ -108,9 +124,18 @@ export class InteractionPrompt {
     return this.inspectOpen;
   }
 
+  /** Hide the prompt line — used while a modal overlay (e.g. evidence board) is up. */
+  setPromptSuppressed(suppressed: boolean): void {
+    if (suppressed) {
+      this.prompt.classList.remove("visible");
+      this.lastPromptText = "";
+    }
+  }
+
   dispose(): void {
     this.unsubscribe?.();
     this.unsubscribe = null;
+    this.system = null;
     this.scene.onBeforeRenderObservable.removeCallback(this.onBeforeRender);
     if (this.hintTimer !== null) window.clearTimeout(this.hintTimer);
     for (const el of [this.reticle, this.prompt, this.hint, this.inspect]) {
@@ -118,14 +143,21 @@ export class InteractionPrompt {
     }
   }
 
-  private updatePrompt(t: Interactable | null): void {
+  private renderPrompt(t: Interactable | null): void {
     if (!t) {
-      this.prompt.textContent = "";
-      this.prompt.classList.remove("visible");
+      if (this.lastPromptText !== "") {
+        this.prompt.textContent = "";
+        this.prompt.classList.remove("visible");
+        this.lastPromptText = "";
+      }
       return;
     }
-    this.prompt.textContent = `[E] ${verbForKind(t.kind)} — ${t.prompt}`;
-    this.prompt.classList.add("visible");
+    const text = `[E] ${verbForKind(t.kind)} — ${t.prompt}`;
+    if (text !== this.lastPromptText) {
+      this.prompt.textContent = text;
+      this.prompt.classList.add("visible");
+      this.lastPromptText = text;
+    }
   }
 
   private showInspectPanel(title: string, body: string): void {
@@ -136,6 +168,7 @@ export class InteractionPrompt {
     this.inspectCooldown = 180;
     this.player.setPaused(true);
     this.prompt.classList.remove("visible");
+    this.lastPromptText = "";
   }
 
   private closeInspect(options: { unpause: boolean }): void {

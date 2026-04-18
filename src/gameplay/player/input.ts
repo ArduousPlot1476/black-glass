@@ -5,6 +5,7 @@ export type ActionKey =
   | "right"
   | "sprint"
   | "interact"
+  | "evidence"
   | "pause";
 
 const KEY_MAP: Record<string, ActionKey> = {
@@ -19,6 +20,7 @@ const KEY_MAP: Record<string, ActionKey> = {
   ShiftLeft: "sprint",
   ShiftRight: "sprint",
   KeyE: "interact",
+  Tab: "evidence",
   Escape: "pause",
 };
 
@@ -61,7 +63,7 @@ export class InputState {
   private onKeyDown = (e: KeyboardEvent): void => {
     const action = KEY_MAP[e.code];
     if (!action) return;
-    if (action === "pause") e.preventDefault();
+    if (action === "pause" || action === "evidence") e.preventDefault();
     if (!this.held.has(action)) this.justPressed.add(action);
     this.held.add(action);
   };

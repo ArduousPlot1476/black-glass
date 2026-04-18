@@ -92,6 +92,19 @@ Do not generalize: avoid building a full inventory or global puzzle system yet.
 ---
 
 ## M2 — Evidence loop and inventory/evidence board
+**Status: complete.** Data-driven evidence registry (`src/data/evidence`)
+with three authored entries (`ev_shift_log`, `ev_data_shard`, `ev_hvac_spike`).
+`EvidenceStore` tracks in-session collection with idempotent collect and change
+listeners. `InteractionContext` split into a UI-only surface
+(`PromptUIContext`) and a full gameplay context the scene composes; existing
+interactables were rewired to collect evidence on activate, and a new south-
+wall HVAC vent adds the observation source. A sealed maintenance panel on the
+east wall acts as the one M2 progression gate: while locked, interacting
+flashes a progress hint; with all three evidence items, the panel tweens
+upward and its prompt mutates to reveal the Maintenance Log. A Tab-toggled
+DOM evidence board (list + detail panes) pauses the player, suppresses the
+pause menu's auto-open, and closes on Tab or Esc. No M3+ systems added.
+
 ### Goal
 Add evidence acquisition, inspection, tracking, and one gated progression step based on gathered information or a found item.
 

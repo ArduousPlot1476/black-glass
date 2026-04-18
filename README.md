@@ -68,10 +68,15 @@ and **click the canvas** to enter pointer lock. Controls:
 - Sprint: **Shift**
 - Look: **mouse** (while pointer-locked)
 - Interact: **E**
+- Evidence board: **Tab**
 - Pause / release pointer: **Esc**
 
-The M1 room contains three interactables: a shift-log terminal (read), a
-wall switch (toggle the ceiling lamp), and a data shard on the desk (pickup).
+The M2 room contains five interactables: a shift-log terminal (read +
+logs evidence), a wall switch (toggle the ceiling lamp), a data shard on
+the desk (pickup + logs evidence), a south-wall HVAC vent (read + logs
+evidence), and a sealed maintenance panel on the east wall (progression
+gate — unlocks once all three evidence items are logged). Press **Tab** to
+open the evidence board.
 
 Type check + production build:
 
@@ -95,19 +100,20 @@ src/
     bootstrap.ts    # engine, render loop, resize handling
     config.ts       # app-level constants
   scenes/
-    RootScene.ts    # M1 first room + interactables
+    RootScene.ts    # M2 first room + evidence + gate
   styles.css
   gameplay/
     player/         # M1: PlayerController, input
     interaction/    # M1: Interactable, InteractionSystem, types
-    ui/             # M1: InteractionPrompt, PauseMenu
-    inventory/      # reserved — M2
-    evidence/       # reserved — M2
+    ui/             # M1–M2: InteractionPrompt, PauseMenu, EvidenceBoard
+    inventory/      # reserved — future (M2 uses EvidenceStore directly)
+    evidence/       # M2: EvidenceRegistry, EvidenceStore, types
     worldState/     # reserved — M3
     ai/             # reserved — M4
   systems/          # reserved — input/audio/assets (M1+)
   render/           # reserved — pipeline/post (M1+)
-  data/             # reserved — evidence/items/world/endings
+  data/
+    evidence/       # M2: authored evidence entries
   debug/            # reserved — debug overlays
   assets/           # reserved — imported authored assets
 public/             # static files served at site root
@@ -122,15 +128,16 @@ Milestone-gated folders are intentionally empty for now — see
 - Look: Mouse
 - Interact: E
 - Inspect evidence / alternate use: Right Mouse or Q
-- Inventory / evidence board: Tab
+- Evidence board: Tab
 - Pause: Esc
 
 ## Current status
-**Milestone 1 — complete.** Playable first room with first-person movement,
-pointer-lock mouse look, collision, a reusable interaction shell covering
-`inspect` / `toggle` / `pickup`, a minimal prompt UI, and a pause menu.
-No inventory, evidence board, AI, or world-state systems yet.
+**Milestone 2 — complete.** On top of the M1 shell: a data-driven evidence
+registry + in-session store, three collectable evidence sources (terminal,
+data shard, HVAC vent), a Tab-toggled evidence review board, and one
+progression gate (sealed maintenance panel) that unlocks once all three
+evidence items are logged. No AI, world-state, or multi-room systems yet.
 
 ## Next step
-Begin Milestone 2 (evidence loop and inventory/evidence board) on top of the
-existing interaction shell — see `docs/milestones.md`.
+Begin Milestone 3 (stateful environment and spatial progression) on top of
+the existing evidence model — see `docs/milestones.md`.
