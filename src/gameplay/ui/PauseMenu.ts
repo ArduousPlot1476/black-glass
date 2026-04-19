@@ -20,6 +20,7 @@ export class PauseMenu {
 
   private open = false;
   private shouldOpenOnUnlock = true;
+  private hasEverLocked = false;
 
   private readonly onPointerLockChange: () => void;
   private readonly onResumeClick: () => void;
@@ -70,9 +71,17 @@ export class PauseMenu {
 
     this.onPointerLockChange = (): void => {
       const nowLocked = document.pointerLockElement !== null;
-      if (!nowLocked && this.shouldOpenOnUnlock && !this.open) {
-        this.show();
+      if (nowLocked) {
+        this.hasEverLocked = true;
+        return;
       }
+      // Only surface the pause overlay on a real unlock — i.e. we had previously
+      // been locked. Without this guard, a failed initial lock request (some
+      // browsers still fire pointerlockchange with pointerLockElement=null on
+      // denial) would auto-open the pause menu at startup and the user would
+      // never have a chance to click-to-play.
+      if (!this.hasEverLocked) return;
+      if (this.shouldOpenOnUnlock && !this.open) this.show();
     };
     document.addEventListener("pointerlockchange", this.onPointerLockChange);
 

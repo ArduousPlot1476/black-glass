@@ -57,7 +57,7 @@ export class PlayerController {
     this.onCanvasClick = (): void => {
       if (this.paused) return;
       if (document.pointerLockElement !== this.canvas) {
-        this.canvas.requestPointerLock?.();
+        this.tryRequestPointerLock();
       }
     };
     this.canvas.addEventListener("click", this.onCanvasClick);
@@ -109,7 +109,24 @@ export class PlayerController {
 
   requestPointerLock(): void {
     if (!this.paused && document.pointerLockElement !== this.canvas) {
-      this.canvas.requestPointerLock?.();
+      this.tryRequestPointerLock();
+    }
+  }
+
+  private tryRequestPointerLock(): void {
+    // Modern Chromium returns a Promise that rejects on denial (e.g. transient
+    // activation missing, rapid re-request cooldown). Swallow the rejection so
+    // it does not surface as an "Unhandled Promise rejection" and log it so
+    // failures are visible instead of silently leaving the player un-locked.
+    try {
+      const result = (this.canvas.requestPointerLock as undefined | (() => unknown))?.();
+      if (result && typeof (result as Promise<unknown>).then === "function") {
+        (result as Promise<unknown>).catch((err: unknown) => {
+          console.warn("[BLACK GLASS] requestPointerLock rejected:", err);
+        });
+      }
+    } catch (err) {
+      console.warn("[BLACK GLASS] requestPointerLock threw:", err);
     }
   }
 
