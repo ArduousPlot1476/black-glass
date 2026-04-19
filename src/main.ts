@@ -22,7 +22,7 @@ async function main(): Promise<void> {
   try {
     setStatus("BLACK GLASS — initializing engine…");
     const app = await startApp(canvas);
-    setStatus(`BLACK GLASS — M1 • click to play • WASD • E • Esc (${app.engineName})`, "ok");
+    setStatus(`BLACK GLASS — M3 • click to play • WASD • E • Tab • Esc (${app.engineName})`, "ok");
   } catch (err) {
     console.error("[BLACK GLASS] Boot failed:", err);
     setStatus("BLACK GLASS — boot failed (see console)", "error");

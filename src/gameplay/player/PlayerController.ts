@@ -95,6 +95,18 @@ export class PlayerController {
     this.input.clearAll();
   }
 
+  getPose(): { x: number; y: number; z: number; yaw: number; pitch: number } {
+    const p = this.camera.position;
+    return { x: p.x, y: p.y, z: p.z, yaw: this.yaw, pitch: this.pitch };
+  }
+
+  setPose(x: number, y: number, z: number, yaw: number, pitch: number): void {
+    this.camera.position.set(x, y, z);
+    this.yaw = yaw;
+    this.pitch = pitch;
+    this.camera.rotation.set(this.pitch, this.yaw, 0);
+  }
+
   requestPointerLock(): void {
     if (!this.paused && document.pointerLockElement !== this.canvas) {
       this.canvas.requestPointerLock?.();

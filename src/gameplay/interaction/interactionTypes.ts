@@ -1,5 +1,7 @@
 import type { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh";
 
+import type { WorldStateSnapshot } from "../worldState/worldStateTypes";
+
 export type InteractionKind = "inspect" | "toggle" | "pickup";
 
 /**
@@ -22,6 +24,12 @@ export interface InteractionContext extends PromptUIContext {
   collectEvidence(id: string): boolean;
   hasEvidence(id: string): boolean;
   hasAllEvidence(ids: readonly string[]): boolean;
+  worldState(): WorldStateSnapshot;
+  setWorldFlag<K extends keyof WorldStateSnapshot>(
+    key: K,
+    value: WorldStateSnapshot[K],
+  ): boolean;
+  saveCheckpoint(id: string, label: string): void;
 }
 
 export interface Interactable {

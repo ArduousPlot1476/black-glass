@@ -71,12 +71,20 @@ and **click the canvas** to enter pointer lock. Controls:
 - Evidence board: **Tab**
 - Pause / release pointer: **Esc**
 
-The M2 room contains five interactables: a shift-log terminal (read +
-logs evidence), a wall switch (toggle the ceiling lamp), a data shard on
-the desk (pickup + logs evidence), a south-wall HVAC vent (read + logs
-evidence), and a sealed maintenance panel on the east wall (progression
-gate — unlocks once all three evidence items are logged). Press **Tab** to
-open the evidence board.
+The M3 slice connects six spaces: the lab/office, a glass corridor, a
+maintenance area, a server alcove, a security nook, and a final hallway.
+An **objective overlay** at the top of the screen shows the current next
+step. Progression depends on world state: the sealed maintenance panel
+still opens once all three lab evidence items are logged, a power-routing
+junction in the maintenance area flips power between the server alcove
+and the security nook (exclusive), and the corridor lockdown only clears
+after the security override console — reachable only when power is routed
+to the security nook — is fired.
+
+Checkpoints are captured automatically at each meaningful progression
+step. Open the pause menu (Esc) and click **Restore last checkpoint** to
+roll world state, collected evidence, and player position back to the
+latest snapshot.
 
 Type check + production build:
 
@@ -100,20 +108,23 @@ src/
     bootstrap.ts    # engine, render loop, resize handling
     config.ts       # app-level constants
   scenes/
-    RootScene.ts    # M2 first room + evidence + gate
+    RootScene.ts    # orchestrates stores, UI, controller, and the floor
+    rooms/          # M3: FloorLayout, SlidingDoor, shared builders,
+                    #     and the per-prop interactables module
   styles.css
   gameplay/
     player/         # M1: PlayerController, input
     interaction/    # M1: Interactable, InteractionSystem, types
-    ui/             # M1–M2: InteractionPrompt, PauseMenu, EvidenceBoard
-    inventory/      # reserved — future (M2 uses EvidenceStore directly)
+    ui/             # M1–M3: Prompt, PauseMenu, EvidenceBoard, Objective
+    inventory/      # reserved — future
     evidence/       # M2: EvidenceRegistry, EvidenceStore, types
-    worldState/     # reserved — M3
+    worldState/     # M3: WorldStateStore, CheckpointManager, types
     ai/             # reserved — M4
   systems/          # reserved — input/audio/assets (M1+)
   render/           # reserved — pipeline/post (M1+)
   data/
     evidence/       # M2: authored evidence entries
+    world/          # M3: world-state definitions (initial snapshot)
   debug/            # reserved — debug overlays
   assets/           # reserved — imported authored assets
 public/             # static files served at site root
@@ -132,12 +143,18 @@ Milestone-gated folders are intentionally empty for now — see
 - Pause: Esc
 
 ## Current status
-**Milestone 2 — complete.** On top of the M1 shell: a data-driven evidence
-registry + in-session store, three collectable evidence sources (terminal,
-data shard, HVAC vent), a Tab-toggled evidence review board, and one
-progression gate (sealed maintenance panel) that unlocks once all three
-evidence items are logged. No AI, world-state, or multi-room systems yet.
+**Milestone 3 — complete.** On top of M1/M2: six connected spaces
+(lab, glass corridor, maintenance area, server alcove, security nook,
+final hallway) with three world-state flags — `powerRouting`,
+`maintenancePanelOpen`, `corridorLockdownCleared` — driving door state
+from a central `WorldStateStore`. Two real world-state dependencies:
+exclusive power routing (server alcove ⇄ security nook) and a corridor
+lockdown that only clears once the security override is fired. A minimal
+`CheckpointManager` captures world state + collected evidence + player
+pose at each progression beat; the pause menu exposes a "Restore last
+checkpoint" button. An `ObjectiveOverlay` keeps the player oriented
+without a quest log. No AI or threat behavior yet.
 
 ## Next step
-Begin Milestone 3 (stateful environment and spatial progression) on top of
-the existing evidence model — see `docs/milestones.md`.
+Begin Milestone 4 (threat AI and fail/retry loop) on top of the
+world-state + checkpoint systems — see `docs/milestones.md`.

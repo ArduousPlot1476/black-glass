@@ -1,7 +1,12 @@
 import type { EvidenceRegistry } from "./EvidenceRegistry";
 import type { EvidenceEntry } from "./evidenceTypes";
 
-type ChangeListener = (id: string) => void;
+/**
+ * A single collected id, or `null` for bulk changes (e.g. checkpoint restore
+ * replacing the whole set at once). Listeners that only care "did something
+ * change" can ignore the id.
+ */
+type ChangeListener = (id: string | null) => void;
 
 /**
  * In-session collection state. Idempotent: collecting the same id twice is a
@@ -26,6 +31,19 @@ export class EvidenceStore {
     this.collected.add(id);
     for (const listener of this.listeners) listener(id);
     return true;
+  }
+
+  /** Replace the entire collected set. Silently skips unknown ids. */
+  replace(ids: readonly string[]): void {
+    this.collected.clear();
+    for (const id of ids) {
+      if (this.registry.has(id)) this.collected.add(id);
+    }
+    for (const listener of this.listeners) listener(null);
+  }
+
+  collectedIds(): readonly string[] {
+    return [...this.collected];
   }
 
   has(id: string): boolean {

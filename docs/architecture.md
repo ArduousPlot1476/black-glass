@@ -114,6 +114,23 @@ Requirements:
 
 A single world-state store is acceptable if kept disciplined.
 
+#### M3 implementation
+The M3 slice uses a single `WorldStateStore` in
+`src/gameplay/worldState/` backed by a typed, flat `WorldStateSnapshot`.
+Fields currently declared:
+- `powerRouting: "server_alcove" | "security_nook"` — exclusive routing
+  between the two gated rooms.
+- `maintenancePanelOpen: boolean` — the M2 evidence gate, now tracked in
+  world state so door visuals and checkpoints share the same source.
+- `corridorLockdownCleared: boolean` — cleared by the security override
+  console.
+
+Mutations emit `(next, prev)` to listeners. Door meshes and the
+objective overlay subscribe directly — there are no side-channels for
+progression. `replaceAll` exists only for `CheckpointManager.restore`.
+Keep this schema narrow: add a flag here only when more than one system
+needs to read it.
+
 ### 6. Inventory / tool handling
 Keep narrow for the slice.
 Support only what the game actually uses.
@@ -162,6 +179,18 @@ Recommended:
 - preserve meaningful progression flags
 - reset threat position on reload unless design says otherwise
 
+#### M3 implementation
+`CheckpointManager` in `src/gameplay/worldState/` holds a single most-
+recent snapshot: `WorldStateSnapshot` + collected evidence ids + player
+pose. `save()` overwrites; `restore()` writes through the authoritative
+stores (`WorldStateStore.replaceAll`, `EvidenceStore.replace`,
+`PlayerController.setPose`), so any subscribed visuals (doors,
+objective overlay, evidence board) update through their normal change
+paths. Pause menu (`src/gameplay/ui/PauseMenu.ts`) exposes a "Restore
+last checkpoint" button. Auto-save fires on each progression beat —
+maintenance panel open, power reroute, corridor override, final-hall
+plaque. Multi-slot saves are intentionally out of scope.
+
 ### 10. Finale / ending resolution
 Endings should resolve from tracked state, not scripted hardcoding per path.
 Minimal ending decision inputs:
@@ -180,6 +209,26 @@ Suggested approach:
 - reusable terminal / pickup / switch modules
 - AI spawned in specific zones
 - UI persistent for whole run
+
+#### M3 implementation
+`src/scenes/RootScene.ts` is the orchestrator only — it creates the
+stores, player, UI layers, interaction system, and hands the floor off
+to two room modules in `src/scenes/rooms/`:
+- `FloorLayout.ts` — declares room bounds as exported constants, builds
+  floors/ceilings/walls, and sets up one light pass per space. Shared-
+  wall ownership (which room owns each boundary segment) is documented
+  inline so edits don't double-up walls.
+- `roomInteractables.ts` — all interactables and doors. Doors use
+  `SlidingDoor` (see below) and are driven from world-state
+  subscriptions so they behave identically on forward play and on
+  checkpoint restore.
+- `SlidingDoor.ts` — a thin "box mesh that slides up / disables
+  collision" primitive with `setOpen` (tween) and `setOpenImmediate`
+  (snap) entry points.
+- `sharedBuilders.ts` — floor/wall/ceiling helpers and shared materials.
+
+This stays well below a scene-graph framework while keeping `RootScene`
+readable as a wiring diagram.
 
 ## Rendering strategy
 - Start from a stable baseline.

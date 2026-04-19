@@ -140,6 +140,23 @@ Do not generalize: avoid building a giant case-board feature set yet.
 ---
 
 ## M3 — Stateful environment and spatial progression
+**Status: complete.** A single `WorldStateStore` (`powerRouting`,
+`maintenancePanelOpen`, `corridorLockdownCleared`) is the backbone for
+progression across six connected spaces: lab/office (the M2 room),
+glass corridor, maintenance area, server alcove, security nook, and
+final hallway. Two real world-state dependencies drive the slice — an
+exclusive power-routing junction that gates the server alcove and
+security nook doors as mirrors of each other, and a corridor lockdown
+that only clears once the security override console (live only while
+power is routed to the security nook) is fired. Door visuals subscribe
+to world state so they update identically on forward play and on
+checkpoint restore. A minimal `CheckpointManager` captures world state,
+collected evidence ids, and player pose; auto-saves fire on each
+progression beat and the pause menu exposes "Restore last checkpoint".
+An `ObjectiveOverlay` derives the current next step from state so the
+player stays oriented without a quest log. No M4 threat/AI systems
+added.
+
 ### Goal
 Expand the slice into the full playable floor using access, alarms, and environmental state as the backbone of progression.
 

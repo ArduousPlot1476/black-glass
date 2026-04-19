@@ -1,6 +1,6 @@
 export const AppConfig = {
   title: "BLACK GLASS",
-  milestone: "M2",
+  milestone: "M3",
 
   engine: {
     antialias: true,
